@@ -10,6 +10,8 @@ const Token_Models = require("../Models/Token_Models");
 const { token } = require("morgan");
 const note_Models = require("../Models/note_Models");
 
+/* yoon sang won */
+
 /* MemberGroup */
 router.get("/mgr", function (req, res, next) {
     console.log(req.query);
