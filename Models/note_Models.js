@@ -3,12 +3,12 @@ const moment = require("moment");
 var router = express.Router();
 const { prisma, run_prisma } = require("./Prisma_Models");
 const Token_Models = require("../Models/Token_Models");
-const Messages_Models = require("../Models/Messages_Models");
+const MSG = require("../Models/Messages_Models");
 
 class Test {
     constructor() {}
 
-    async Note(sendid, recvid, title, content, relate_post) {
+    async SendNote(sendid, recvid, title, content, relate_post) {
         const result = await run_prisma(
             prisma.rs_note.create({
                 data: {
@@ -38,10 +38,12 @@ class Test {
         if (result.successful === false) {
             console.log(result);
             return MSG.onError(99999);
+        } else {
+            return MSG.onSuccess(200);
         }
     }
 
-    async Note1(sendid, recvid, title, content, relate_post) {
+    async ReceiveNote(sendid, recvid, title, content, relate_post) {
         const result = await run_prisma(
             prisma.rs_note.create({
                 data: {
@@ -71,6 +73,8 @@ class Test {
         if (result.successful === false) {
             console.log(result);
             return MSG.onError(99999);
+        } else {
+            return MSG.onSuccess(200);
         }
     }
     async NoteDelete(not_idx) {
@@ -84,6 +88,8 @@ class Test {
         if (result.successful === false) {
             console.log(result);
             return MSG.onError(99999);
+        } else {
+            return MSG.onSuccess(200);
         }
     }
 }

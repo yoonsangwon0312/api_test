@@ -11,8 +11,6 @@ model test {
   test_idx      Int    @id @default(autoincrement())
   test_value    String
   test_deletion Int    @default(0)
-
-  @@unique([test_value, test_deletion], name: "test_value_deletion_unique")
 }
 
 model board_cate {
@@ -32,24 +30,22 @@ model board_post {
 }
 
 model rs_member {
-  mem_idx                                Int                    @id @default(autoincrement())
-  mem_userid                             String                 @default("")
-  mem_userpw                             String                 @default("")
-  mem_username                           String                 @unique @default("")
-  mem_email                              String                 @unique @default("")
+  mem_idx                                Int         @id @default(autoincrement())
+  mem_usernickname                       String      @default("")
+  mem_userpw                             String      @default("")
+  mem_userid                             String      @unique @default("")
+  mem_email                              String      @unique @default("")
   mem_lastlogin_datetime                 String
   mem_lastlogin_timestamp                Int
   mem_inactive_check                     String?
-  mem_is_admin                           Int                    @default(0)
-  rs_board_admin                         rs_board_admin[]
-  rs_board_likebad_map                   rs_board_likebad_map[]
-  rs_mem_auth                            rs_mem_auth[]
-  rs_mgr_mem                             rs_mgr_mem[]
-  rs_note_rs_memberTors_note_not_recv_id rs_note[]              @relation("rs_memberTors_note_not_recv_id")
-  rs_note_rs_memberTors_note_not_send_id rs_note[]              @relation("rs_memberTors_note_not_send_id")
+  mem_is_admin                           Int         @default(0)
+  mem_point                              Int         @default(500)
+  rs_mgr_mem                             rs_mgr_mem?
+  rs_note_rs_memberTors_note_not_recv_id rs_note[]   @relation("rs_memberTors_note_not_recv_id")
+  rs_note_rs_memberTors_note_not_send_id rs_note[]   @relation("rs_memberTors_note_not_send_id")
+  rs_point                               rs_point?
 
-  @@index([mem_idx, mem_email], name: "mem_idx")
-  @@index([mem_userid], name: "mem_userid")
+  @@index([mem_usernickname], name: "mem_usernickname_unique")
 }
 
 model rs_mem_login_log {
@@ -74,14 +70,13 @@ model rs_mgr {
 
 model rs_mgr_mem {
   mgm_mgr_idx   Int
-  mgm_mem_idx   Int
+  mgm_mem_idx   Int       @unique
   mgm_datetime  String
   mgm_timestemp Int
   rs_member     rs_member @relation(fields: [mgm_mem_idx], references: [mem_idx])
   rs_mgr        rs_mgr    @relation(fields: [mgm_mgr_idx], references: [mgr_id])
 
   @@id([mgm_mgr_idx, mgm_mem_idx])
-  @@index([mgm_mem_idx], name: "mgm_mem_id_foreignKey")
   @@index([mgm_mgr_idx], name: "mgm_mgr_id_foreignKey")
 }
 
@@ -97,20 +92,17 @@ model rs_point_log {
 }
 
 model rs_point {
-  idx           Int    @default(autoincrement())
-  poi_mem_id    Int
+  idx           Int       @id @default(autoincrement())
+  poi_mem_id    Int       @unique
   poi_point     Int
   poi_datetime  String
   poi_timestemp Int
-
-  @@id([idx, poi_mem_id])
-  @@index([poi_mem_id], name: "poi_acl_id_foreignKey")
+  rs_member     rs_member @relation(fields: [poi_mem_id], references: [mem_idx])
 }
 
 model rs_board_category {
-  cat_idx       Int             @id
-  cat_title     String
-  rs_board_post rs_board_post[]
+  cat_idx   Int    @id
+  cat_title String
 }
 
 model rs_board_comment {
@@ -144,7 +136,6 @@ model rs_board_post {
   pst_mem_idx          Int
   pst_mem_id           String
   pst_mem_nick         String
-  rs_board_category    rs_board_category      @relation(fields: [pst_cat_idx], references: [cat_idx])
   rs_board_likebad_map rs_board_likebad_map[]
   rs_note              rs_note[]
 
@@ -155,11 +146,10 @@ model rs_board_post {
 }
 
 model rs_mem_auth {
-  auth_idx      Int       @id @default(autoincrement())
-  auth_email    String    @default("")
+  auth_idx      Int    @id @default(autoincrement())
+  auth_email    String @default("")
   authNumber    Int
   auth_datetime String
-  rs_member     rs_member @relation(fields: [auth_email], references: [mem_email])
 
   @@index([auth_email], name: "foreign_mem_email")
 }
@@ -189,7 +179,6 @@ model rs_board_likebad_map {
   blm_cnt_bad          Int?
   rs_board_comment     rs_board_comment? @relation(fields: [blm_cmt_idx], references: [cmt_idx])
   rs_board_post        rs_board_post?    @relation(fields: [blm_post_idx], references: [pst_idx])
-  rs_member            rs_member         @relation(fields: [blm_user_idx], references: [mem_idx])
 
   @@index([blm_cmt_idx], name: "blm_cmt_idx_foreignKey")
   @@index([blm_post_idx], name: "blm_post_idx_foreignKey")
@@ -197,30 +186,55 @@ model rs_board_likebad_map {
 }
 
 model rs_note {
-  not_idx                                  Int           @unique @default(autoincrement())
-  not_recv_id                              Int
-  not_send_id                              Int
+  not_idx                                  Int            @id @default(autoincrement())
+  not_recv_id                              Int?
+  not_send_id                              Int?
   not_type                                 Int
   not_title                                String
-  not_relate_post_idx                      Int
+  not_relate_post_idx                      Int?
   not_content                              String
   not_datetime                             String
   not_timestemp                            Int
-  rs_member_rs_memberTors_note_not_recv_id rs_member     @relation("rs_memberTors_note_not_recv_id", fields: [not_recv_id], references: [mem_idx])
-  rs_board_post                            rs_board_post @relation(fields: [not_relate_post_idx], references: [pst_idx])
-  rs_member_rs_memberTors_note_not_send_id rs_member     @relation("rs_memberTors_note_not_send_id", fields: [not_send_id], references: [mem_idx])
+  rs_member_rs_memberTors_note_not_recv_id rs_member?     @relation("rs_memberTors_note_not_recv_id", fields: [not_recv_id], references: [mem_idx])
+  rs_board_post                            rs_board_post? @relation(fields: [not_relate_post_idx], references: [pst_idx])
+  rs_member_rs_memberTors_note_not_send_id rs_member?     @relation("rs_memberTors_note_not_send_id", fields: [not_send_id], references: [mem_idx])
 
-  @@id([not_idx, not_recv_id, not_send_id, not_relate_post_idx])
-  @@index([not_recv_id], name: "recv_id_foreignKeys")
+  @@index([not_recv_id], name: "recv_id_foreignKey")
   @@index([not_relate_post_idx], name: "relate_post_idx_foreignKeys")
-  @@index([not_send_id], name: "send_id_foreignKeys")
+  @@index([not_send_id], name: "send_id_foreignKey")
 }
 
 model rs_board_admin {
-  adm_idx     Int       @id @default(autoincrement())
+  adm_idx     Int    @id @default(autoincrement())
   adm_mem_idx Int
   adm_mem_id  String
-  rs_member   rs_member @relation(fields: [adm_mem_idx], references: [mem_idx])
 
   @@index([adm_mem_idx], name: "adm_mem_idx_foreignKey")
+}
+
+model pris_member {
+  mem_idx      Int    @id @default(autoincrement())
+  mem_email    String @unique
+  mem_password String
+}
+
+model rs_menu {
+  menu_idx  Int     @id
+  menu_code String?
+  ins_date  String?
+  upd_date  String?
+  menu_name String?
+}
+
+model test2 {
+  test_idx      Int    @id @default(autoincrement())
+  test_unique   String @unique
+  test_deletion Int    @default(0)
+
+  @@unique([test_unique, test_deletion], name: "test_unique_test_deletion_unique")
+}
+
+model pris_log {
+  id    Int    @id @default(autoincrement())
+  email String
 }

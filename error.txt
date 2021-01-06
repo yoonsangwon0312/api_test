@@ -1,0 +1,25 @@
+        async getLoginFailedCount (email){
+            const result = await run_prisma(
+                prisma.rs_mem_login_log.findMany({ 
+                    where:{
+                        mll_email:email 
+                    },
+                    orderBy:{
+                        mll_idx: "desc"
+                    }
+                })
+            )
+            if(result.successful === false){
+                console.log(result)
+                return MSG.onError(99999)
+            }
+            let loginFailedCount = 0;
+            for(const _loginLog of result.data){
+                if(_loginLog.mll_success === 0){
+                    loginFailedCount++;
+                } else {
+                    break;
+                }
+            }
+            return MSG.onSuccess(99999,loginFailedCount);
+        }

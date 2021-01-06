@@ -15,7 +15,7 @@ const note_Models = require("../Models/note_Models");
 
 /* MemberGroup */
 
-router.post("/mgr", async function (req, res, next) {
+router.post("/mgr1", async function (req, res, next) {
     const token = req.headers.tokenverify;
     const Token = await Token_Models.verify_access(token);
     if (Token.successful === false) {
@@ -33,7 +33,7 @@ router.post("/mgr", async function (req, res, next) {
     }
 });
 
-router.post("/mgr_del", async function (req, res, next) {
+router.post("/mgr_del1", async function (req, res, next) {
     const token = req.headers.tokenverify;
     const Token = await Token_Models.verify_access(token);
     if (Token.successful === false) {
@@ -52,7 +52,7 @@ router.post("/mgr_del", async function (req, res, next) {
 });
 
 /* MemberGroupMember */
-router.post("/mgrmem", async function (req, res, next) {
+router.post("/mgrmem1", async function (req, res, next) {
     const token = req.headers.tokenverify;
     const Token = await Token_Models.verify_access(token);
     if (Token.successful === false) {
@@ -70,7 +70,7 @@ router.post("/mgrmem", async function (req, res, next) {
     }
 });
 
-router.post("/mgrmem_del", async function (req, res, next) {
+router.post("/mgrmem_del1", async function (req, res, next) {
     const token = req.headers.tokenverify;
     const Token = await Token_Models.verify_access(token);
     if (Token.successful === false) {
@@ -89,26 +89,26 @@ router.post("/mgrmem_del", async function (req, res, next) {
 });
 
 /* Point */
-// router.post("/point", async function (req, res, next) {
-//     const { poi_id, point } = req.body;
-//     const cre_point = await point_Models.CreatePoint(poi_id, point);
-//     console.log(cre_point);
-//     if (cre_point.successful === false) {
-//         res.json("포인트 생성 실패");
-//     } else {
-//         res.json("포인트 생성 완료");
-//     }
-// });
+router.post("/point1", async function (req, res, next) {
+    const { poi_id, point } = req.body;
+    const cre_point = await point_Models.CreatePoint(poi_id, point);
+    console.log(cre_point);
+    if (cre_point.successful === false) {
+        res.json("포인트 생성 실패");
+    } else {
+        res.json("포인트 생성 완료");
+    }
+});
 
-router.post("/pointinc", async function (req, res, next) {
+router.post("/pointinc1", async function (req, res, next) {
     const token = req.headers.tokenverify;
     const Token = await Token_Models.verify_access(token);
     if (Token.successful === false) {
         console.log(token);
         return MSG.onError(99999);
     } else {
-        const { mem_idx, type, amount } = req.body;
-        const inc_point = await point_Models.incrementPoint(mem_idx, type, amount);
+        const { poi_mem_id, type, amount } = req.body;
+        const inc_point = await point_Models.incrementPoint(poi_mem_id, type, amount);
         console.log(inc_point);
         if (inc_point.successful === false) {
             res.json("포인트 지급 실패");
@@ -119,12 +119,12 @@ router.post("/pointinc", async function (req, res, next) {
 });
 
 // Middleware;
-router.post("/pointdec", token_verify);
-router.post("/pointdec", async function (req, res, next) {
+router.use(token_verify);
+router.post("/pointdec1", async function (req, res, next) {
     const tokendata = req.tokeninfo;
     console.log(tokendata);
-    const { mem_idx, type, amount } = req.body;
-    const decpoint = await point_Models.Decrement_Point(mem_idx, amount, type);
+    const { poi_mem_id, type, amount } = req.body;
+    const decpoint = await point_Models.Decrement_Point(poi_mem_id, amount, type);
     console.log(decpoint);
     if (decpoint.successful === false) {
         res.json("포인트 차감 실패");
@@ -134,7 +134,7 @@ router.post("/pointdec", async function (req, res, next) {
 });
 
 /* 쪽지 발송 */
-router.post("/note", async function (req, res, next) {
+router.post("/note1", async function (req, res, next) {
     const token = req.headers.tokenverify;
     const Token = await Token_Models.verify_access(token);
 
@@ -156,7 +156,7 @@ router.post("/note", async function (req, res, next) {
 });
 
 /* 쪽지삭제 */
-router.post("/notedel", async function (req, res, next) {
+router.post("/notedel1", async function (req, res, next) {
     const token = req.headers.tokenverify;
     const Token = await Token_Models.verify_access(token);
     if (Token.successful === false) {
@@ -166,21 +166,16 @@ router.post("/notedel", async function (req, res, next) {
         const { not_idx } = req.body;
         const notedel = await note_Models.NoteDelete(not_idx);
         console.log(notedel);
-        if (notedel.successful === false) {
-            res.json(" 쪽지 삭제 실패");
-        } else {
-            res.json("쪽지 삭제 성공");
-        }
     }
 });
 
 /* Access 토큰 생성 및 인증 */
-router.post("/token", async function (req, res, next) {
+router.post("/token1", async function (req, res, next) {
     const createToken = await Token_Models.generateAccessToken({ name: 12123 });
     console.log(createToken);
     res.json(createToken);
 });
-router.post("/tokenverify", async function (req, res, next) {
+router.post("/tokenverify1", async function (req, res, next) {
     const tokenverify = await Token_Models.verify_access(req.body.tokenverify);
     console.log(tokenverify);
     res.json(tokenverify);

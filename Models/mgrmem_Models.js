@@ -2,6 +2,7 @@ var express = require("express");
 const moment = require("moment");
 var router = express.Router();
 const { prisma, run_prisma } = require("./Prisma_Models");
+const MSG = require("./Messages_Models");
 
 class Test {
     constructor() {}
@@ -25,18 +26,28 @@ class Test {
                 },
             })
         );
-        return result;
+        if (result.successful === false) {
+            console.log(result);
+            return MSG.onError(99999);
+        } else {
+            return MSG.onSuccess(200);
+        }
     }
 
     async Deletemgrmem(id) {
         const result = await run_prisma(
-            prisma.rs_mgr_mem.deleteMany({
+            prisma.rs_mgr_mem.delete({
                 where: {
                     mgm_mem_idx: Number(id),
                 },
             })
         );
-        return result;
+        if (result.successful === false) {
+            console.log(result);
+            return MSG.onError(99999);
+        } else {
+            return MSG.onSuccess(200);
+        }
     }
 }
 
