@@ -10,84 +10,71 @@ const point_Models = require("../Models/point_Models");
 const Token_Models = require("../Models/Token_Models");
 const { token } = require("morgan");
 const note_Models = require("../Models/note_Models");
+const { route } = require("./test");
 
 /* yoon sang won */
 
-/* MemberGroup */
-
+/* MemberGroupCreate */
+router.use(token_verify);
 router.post("/mgr", async function (req, res, next) {
-    const token = req.headers.tokenverify;
-    const Token = await Token_Models.verify_access(token);
-    if (Token.successful === false) {
-        console.log(Token);
-        return MSG.onError(99999);
+    const tokendata = req.tokeninfo;
+    console.log(tokendata);
+    const { id, tit } = req.body;
+    const create_mgr = await mgr_Models.CreateMgr(id, tit);
+    console.log(create_mgr);
+    if (create_mgr.successful === false) {
+        res.json("멤버그룹 생성 실패");
     } else {
-        const { id, tit } = req.body;
-        const create_mgr = await mgr_Models.CreateMgr(id, tit);
-        console.log(create_mgr);
-        if (create_mgr.successful === false) {
-            res.json("멤버그룹 생성 실패");
-        } else {
-            res.json("멤버 그룹 생성 성공");
-        }
+        res.json("멤버 그룹 생성 성공");
     }
 });
 
+/* MemberGroupDelte */
+router.use(token_verify);
 router.post("/mgr_del", async function (req, res, next) {
-    const token = req.headers.tokenverify;
-    const Token = await Token_Models.verify_access(token);
-    if (Token.successful === false) {
-        console.log(Token);
-        return MSG.onError(99999);
+    const tokendata = req.tokeninfo;
+    console.log(tokendata);
+    const { id } = req.body;
+    const del_mgr = await mgr_Models.DeleteMgr(id);
+    console.log(del_mgr);
+    if (del_mgr.successful === false) {
+        res.json("삭제 실패");
     } else {
-        const { id } = req.body;
-        const del_mgr = await mgr_Models.DeleteMgr(id);
-        console.log(del_mgr);
-        if (del_mgr.successful === false) {
-            res.json("삭제 실패");
-        } else {
-            res.json("삭제 완료");
-        }
+        res.json("삭제 완료");
     }
 });
 
-/* MemberGroupMember */
+/* MemberGroupMember insert */
+router.use(token_verify);
 router.post("/mgrmem", async function (req, res, next) {
-    const token = req.headers.tokenverify;
-    const Token = await Token_Models.verify_access(token);
-    if (Token.successful === false) {
-        console.log(Token);
-        return MSG.onError(99999);
+    const tokendata = req.tokeninfo;
+    console.log(tokendata);
+    const { memid, mgrid } = req.body;
+    const cre_mgrmem = await mgrmem_Models.CreateMgrmem(memid, mgrid);
+    console.log(cre_mgrmem);
+    if (cre_mgrmem.successful === false) {
+        res.json("멤버 등록 실패");
     } else {
-        const { memid, mgrid } = req.body;
-        const cre_mgrmem = await mgrmem_Models.CreateMgrmem(memid, mgrid);
-        console.log(cre_mgrmem);
-        if (cre_mgrmem.successful === false) {
-            res.json("멤버 등록 실패");
-        } else {
-            res.json("멤버 등록 성공");
-        }
+        res.json("멤버 등록 성공");
     }
 });
 
+/*Meber Group Member delete */
+router.use(token_verify);
 router.post("/mgrmem_del", async function (req, res, next) {
-    const token = req.headers.tokenverify;
-    const Token = await Token_Models.verify_access(token);
-    if (Token.successful === false) {
-        console.log(token);
-        return MSG.onError(99999);
+    const tokendata = req.tokeninfo;
+    console.log(tokendata);
+    const { id } = req.body;
+    const del_mgrmem = await mgrmem_Models.Deletemgrmem(id);
+    console.log(del_mgrmem);
+    if (del_mgrmem.successful === false) {
+        res.json("멤버가 그룹에서 삭제 실패.");
     } else {
-        const { id } = req.body;
-        const del_mgrmem = await mgrmem_Models.Deletemgrmem(id);
-        console.log(del_mgrmem);
-        if (del_mgrmem.successful === false) {
-            res.json("멤버가 그룹에서 삭제 실패.");
-        } else {
-            res.json("멤버가 그룹에서 삭제 성공.");
-        }
+        res.json("멤버가 그룹에서 삭제 성공.");
     }
 });
 
+// 포인트 부분 멤버로 합쳤음 //
 /* Point */
 // router.post("/point", async function (req, res, next) {
 //     const { poi_id, point } = req.body;
@@ -100,25 +87,25 @@ router.post("/mgrmem_del", async function (req, res, next) {
 //     }
 // });
 
+/*포인트 증가시키기 */
+
+router.use(token_verify);
 router.post("/pointinc", async function (req, res, next) {
-    const token = req.headers.tokenverify;
-    const Token = await Token_Models.verify_access(token);
-    if (Token.successful === false) {
-        console.log(token);
-        return MSG.onError(99999);
+    const tokendata = tokeninfo;
+    console.log(tokendata);
+    const { mem_idx, type, amount } = req.body;
+    const inc_point = await point_Models.incrementPoint(mem_idx, type, amount);
+    console.log(inc_point);
+    if (inc_point.successful === false) {
+        res.json("포인트 지급 실패");
     } else {
-        const { mem_idx, type, amount } = req.body;
-        const inc_point = await point_Models.incrementPoint(mem_idx, type, amount);
-        console.log(inc_point);
-        if (inc_point.successful === false) {
-            res.json("포인트 지급 실패");
-        } else {
-            res.json("포인트 지급 성공");
-        }
+        res.json("포인트 지급 성공");
     }
 });
 
 // Middleware;
+/*포인트 감소시키기 */
+
 router.post("/pointdec", token_verify);
 router.post("/pointdec", async function (req, res, next) {
     const tokendata = req.tokeninfo;
@@ -134,43 +121,34 @@ router.post("/pointdec", async function (req, res, next) {
 });
 
 /* 쪽지 발송 */
+router.use(token_verify);
 router.post("/note", async function (req, res, next) {
-    const token = req.headers.tokenverify;
-    const Token = await Token_Models.verify_access(token);
-
-    if (Token.successful === false) {
-        console.log(token);
-        return MSG.onError(99999);
+    const tokendata = tokeninfo;
+    console.log(tokendata);
+    const { sendid, recvid, title, content, relate_post } = req.body;
+    const sendnot = await note_Models.SendNote(sendid, recvid, title, content, relate_post);
+    const recvnot = await note_Models.ReceiveNote(sendid, recvid, title, content, relate_post);
+    console.log(sendnot);
+    console.log(recvnot);
+    if (sendnot.successful === false) {
+        res.json("쪽지 전송 실패.");
     } else {
-        const { sendid, recvid, title, content, relate_post } = req.body;
-        const sendnot = await note_Models.SendNote(sendid, recvid, title, content, relate_post);
-        const recvnot = await note_Models.ReceiveNote(sendid, recvid, title, content, relate_post);
-        console.log(sendnot);
-        console.log(recvnot);
-        if (sendnot.successful === false) {
-            res.json("쪽지 전송 실패.");
-        } else {
-            res.json("쪽지가 전송되었습니다.");
-        }
+        res.json("쪽지가 전송되었습니다.");
     }
 });
 
 /* 쪽지삭제 */
+router.use(token_verify);
 router.post("/notedel", async function (req, res, next) {
-    const token = req.headers.tokenverify;
-    const Token = await Token_Models.verify_access(token);
-    if (Token.successful === false) {
-        console.log(token);
-        return MSG.onError(999999);
+    const tokendata = tokeninfo;
+    console.log(tokendata);
+    const { not_idx } = req.body;
+    const notedel = await note_Models.NoteDelete(not_idx);
+    console.log(notedel);
+    if (notedel.successful === false) {
+        res.json(" 쪽지 삭제 실패");
     } else {
-        const { not_idx } = req.body;
-        const notedel = await note_Models.NoteDelete(not_idx);
-        console.log(notedel);
-        if (notedel.successful === false) {
-            res.json(" 쪽지 삭제 실패");
-        } else {
-            res.json("쪽지 삭제 성공");
-        }
+        res.json("쪽지 삭제 성공");
     }
 });
 
@@ -190,7 +168,7 @@ async function token_verify(req, res, next) {
     const token = req.headers.tokenverify;
     const Token = await Token_Models.verify_access(token);
     if (Token.successful === false) {
-        res.json("Bye");
+        res.json("Token Error");
         return;
     } else {
         req.tokeninfo = Token.data;
